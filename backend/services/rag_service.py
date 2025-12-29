@@ -22,9 +22,10 @@ class RAGService:
     
     def _initialize_models(self):
         """Initialize embedding model (local download) and LLM (API)"""
-        # Use local embedding model (downloads on first use in Railway)
+        # Use smaller local embedding model
         self.embedding_model = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-mpnet-base-v2"
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={'device': 'cpu'}
         )
     
     def _initialize_llm(self):
