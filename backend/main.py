@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes import auth, cv, chat
 from database import engine, Base
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Create database tables (disabled for production, use Alembic or manual migration)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="RAG CV System API")
 
