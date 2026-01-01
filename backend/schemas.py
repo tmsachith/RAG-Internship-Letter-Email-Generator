@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 # User schemas
 class UserCreate(BaseModel):
@@ -44,6 +44,15 @@ class ChatResponse(BaseModel):
     question: str
     answer: str
 
+class ChatMessageResponse(BaseModel):
+    id: int
+    question: str
+    answer: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
 # Application generation schemas
 class ApplicationRequest(BaseModel):
     job_description: str
@@ -55,3 +64,14 @@ class CoverLetterResponse(BaseModel):
 class EmailResponse(BaseModel):
     subject: str
     content: str
+
+class ApplicationHistoryResponse(BaseModel):
+    id: int
+    job_description: str
+    application_type: str
+    subject: Optional[str]
+    content: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True

@@ -2,22 +2,24 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { Form, Input, Button, Alert, Typography, Space, Card } from 'antd';
+import { MailOutlined, LockOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
+  const [form] = Form.useForm();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: { email: string; password: string }) => {
     setError('');
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(values.email, values.password);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Login failed. Please try again.');
     } finally {
@@ -26,65 +28,72 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
-          Login
-        </h2>
-        
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="your@email.com"
-            />
+    <div style={{ maxWidth: '400px', margin: '80px auto' }}>
+      <Card>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <div style={{ textAlign: 'center' }}>
+            <Title level={2}>Welcome Back</Title>
+            <Text type="secondary">Login to access your CV assistant</Text>
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="••••••••"
-            />
-          </div>
+          {error && <Alert message={error} type="error" showIcon closable />}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300"
+          <Form
+            form={form}
+            onFinish={handleSubmit}
+            layout="vertical"
+            requiredMark={false}
           >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[
+                { required: true, message: 'Please enter your email' },
+                { type: 'email', message: 'Please enter a valid email' },
+              ]}
+            >
+              <Input
+                prefix={<MailOutlined />}
+                placeholder="your@email.com"
+                size="large"
+              />
+            </Form.Item>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link href="/signup" className="text-blue-600 hover:underline">
-            Sign up
-          </Link>
-        </p>
-      </div>
+            <Form.Item
+              name="password"
+              label="Password"
+              rules={[{ required: true, message: 'Please enter your password' }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder="••••••••"
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                loading={loading}
+                block
+              >
+                Login
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <div style={{ textAlign: 'center' }}>
+            <Text type="secondary">
+              Don't have an account?{' '}
+              <Link href="/signup" style={{ color: '#1890ff' }}>
+                Sign up
+              </Link>
+            </Text>
+          </div>
+        </Space>
+      </Card>
     </div>
   );
 }

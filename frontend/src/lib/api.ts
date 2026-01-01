@@ -45,10 +45,31 @@ export const cvAPI = {
 export const chatAPI = {
   ask: (question: string) =>
     api.post('/api/chat/ask', { question }),
+  
+  getHistory: () =>
+    api.get('/api/chat/history'),
+  
+  deleteMessage: (messageId: number) =>
+    api.delete(`/api/chat/history/${messageId}`),
+  
+  clearHistory: () =>
+    api.delete('/api/chat/history'),
 };
 
 // Application API
 export const applicationAPI = {
   generate: (job_description: string, application_type: 'cover_letter' | 'email') =>
     api.post('/api/application/generate', { job_description, application_type }),
+  
+  getHistory: () =>
+    api.get('/api/application/history'),
+  
+  getDetail: (applicationId: number) =>
+    api.get(`/api/application/history/${applicationId}`),
+  
+  deleteApplication: (applicationId: number) =>
+    api.delete(`/api/application/history/${applicationId}`),
+  
+  clearHistory: () =>
+    api.delete('/api/application/history'),
 };
