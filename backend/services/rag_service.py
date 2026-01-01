@@ -3,12 +3,41 @@ import re
 import requests
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings, HuggingFaceEndpoint, ChatHuggingFace
 from langchain_community.vectorstores import PGVector
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.embeddings import Embeddings
 from config import settings
+
+
+class HuggingFaceAPIEmbeddings(Embeddings):
+    """Custom embeddings using HuggingFace API - lightweight, no model downloads"""
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.api_url = "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction"
+    
+    def embed_documents(self, texts: list) -> list:
+        """Embed multiple texts"""
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+        embeddings = []
+        
+        for text in texts:
+            response = requests.post(self.api_url, headers=headers, json={"inputs": text})
+            if response.status_code == 200:
+                embedding = response.json()
+                embeddings.append(embedding)
+            else:
+                raise Exception(f"Embedding API error: {response.status_code} - {response.text}")
+        
+        return embeddings
+    
+    def embed_query(self, text: str) -> list:
+        """Embed a single query text"""
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+        response = requests.post(self.api_url, headers=headers, json={"inputs": text})
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(f"Embedding API error: {response.status_code} - {response.text}")
 
 
 class RAGService:
@@ -21,10 +50,9 @@ class RAGService:
         self._initialize_models()
 
     def _initialize_models(self):
-        """Local embeddings"""
-        self.embedding_model = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={'device': 'cpu'}
+        """Use API-based embeddings instead of local models"""
+        self.embedding_model = HuggingFaceAPIEmbeddings(
+            api_key=settings.HUGGINGFACE_API_KEY
         )
 
     def _markdown_to_html(self, text: str) -> str:
