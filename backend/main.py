@@ -11,7 +11,11 @@ app = FastAPI(title="RAG CV System API")
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js frontend
+    allow_origins=[
+        "http://localhost:3000",  # Local development
+        "https://rag-internship-letter-email-generat.vercel.app",  # Vercel production
+        "https://*.vercel.app",  # All Vercel preview deployments
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
