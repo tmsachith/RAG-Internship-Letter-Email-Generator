@@ -1,15 +1,17 @@
 # RAG CV System
 
-A web-based RAG (Retrieval-Augmented Generation) system that allows users to upload their CVs and ask questions about them using AI.
+A web-based RAG (Retrieval-Augmented Generation) system that allows users to upload their CVs, generate cover letters/emails, and ask questions about them using AI.
 
 ## Features
 
 - 🔐 User authentication (signup/login) with JWT
 - 📄 CV upload to Cloudinary (PDF format)
 - 🤖 AI-powered question answering using LangChain and HuggingFace
-- 💾 PostgreSQL database for user management
+- 📝 Application generator (cover letter/email) with history
+- 💬 Chat interface with history
+- 💾 PostgreSQL database for user management and history
 - 🔍 ChromaDB vector database for semantic search
-- ⚛️ Modern Next.js frontend with Tailwind CSS
+- ⚛️ Modern Next.js frontend with Ant Design 6.x and Tailwind CSS
 
 ## Technology Stack
 
@@ -18,13 +20,14 @@ A web-based RAG (Retrieval-Augmented Generation) system that allows users to upl
 - **PostgreSQL** - User database
 - **ChromaDB** - Vector database
 - **LangChain** - RAG framework
-- **HuggingFace** - LLM (Mistral-7B) and embeddings
-- **Cloudinary** - PDF storage
+- **HuggingFace** - LLM (DeepSeek-V3.2) and embeddings(sentence-transformers/all-mpnet-base-v2)
+- **Cloudinary** - PDF storage (Delete CV after process.)
 - **JWT** - Authentication
 
 ### Frontend
 - **Next.js 14** - React framework
 - **TypeScript** - Type safety
+- **Ant Design 6.x** - UI components
 - **Tailwind CSS** - Styling
 - **Axios** - API requests
 
@@ -36,12 +39,13 @@ RAG/
 │   ├── main.py                    # FastAPI application
 │   ├── config.py                  # Configuration settings
 │   ├── database.py                # Database connection
-│   ├── models.py                  # SQLAlchemy models
+│   ├── models.py                  # SQLAlchemy models (User, CV, ChatMessage, Application)
 │   ├── schemas.py                 # Pydantic schemas
 │   ├── routes/
 │   │   ├── auth.py               # Authentication routes
 │   │   ├── cv.py                 # CV upload routes
-│   │   └── chat.py               # Chat routes
+│   │   ├── chat.py               # Chat & chat history routes
+│   │   └── application.py        # Application generator & history routes
 │   ├── services/
 │   │   ├── cloudinary_service.py # Cloudinary integration
 │   │   └── rag_service.py        # RAG processing
@@ -59,7 +63,8 @@ RAG/
     │   │   ├── signup.tsx        # Signup page
     │   │   ├── dashboard.tsx     # Dashboard
     │   │   ├── upload.tsx        # CV upload page
-    │   │   └── chat.tsx          # Chat interface
+    │   │   ├── chat.tsx          # Chat interface (with history)
+    │   │   └── application.tsx   # Application generator (with history)
     │   ├── contexts/
     │   │   └── AuthContext.tsx   # Authentication context
     │   ├── lib/
@@ -157,7 +162,8 @@ The frontend will be available at `http://localhost:3000`
 1. **Sign Up**: Create a new account with email and password
 2. **Login**: Log in with your credentials
 3. **Upload CV**: Upload your CV as a PDF file (it will be processed automatically)
-4. **Chat**: Ask questions about your CV once processing is complete
+4. **Chat**: Ask questions about your CV once processing is complete (previous chat history is shown in the chat box)
+5. **Generate Application**: Create cover letters or emails from job descriptions (previously generated applications are shown as a list below the generator)
 
 ### Example Questions
 
@@ -167,26 +173,10 @@ The frontend will be available at `http://localhost:3000`
 - "What projects have I worked on?"
 - "Summarize my CV"
 
-## RAG Pipeline
+## Application & Chat History
 
-The system uses the exact RAG pipeline from your Jupyter notebook:
-
-1. **Document Loading**: PDF is loaded using `PyPDFLoader`
-2. **Text Splitting**: Documents are chunked using `RecursiveCharacterTextSplitter` (chunk_size=400, chunk_overlap=50)
-3. **Embeddings**: Uses `sentence-transformers/all-mpnet-base-v2` for embeddings
-4. **Vector Store**: ChromaDB stores the embeddings
-5. **LLM**: Mistral-7B-v0.1 for text generation
-6. **Prompt Template**: Uses your exact template:
-   ```
-   Answer this question using the provided context only.
-
-   {question}
-
-   Context:
-   {context}
-
-   Answer:
-   ```
+- **Chat History**: All previous questions and answers are shown in the chat interface. You can view, copy, or delete messages.
+- **Application History**: All generated cover letters/emails are listed below the generator. You can view, copy, or delete applications.
 
 ## API Endpoints
 
@@ -201,6 +191,16 @@ The system uses the exact RAG pipeline from your Jupyter notebook:
 
 ### Chat
 - `POST /api/chat/ask` - Ask a question about the CV
+- `GET /api/chat/history` - Get chat history
+- `DELETE /api/chat/history/{id}` - Delete chat message
+- `DELETE /api/chat/history` - Clear all chat history
+
+### Application
+- `POST /api/application/generate` - Generate cover letter/email
+- `GET /api/application/history` - Get application history
+- `GET /api/application/history/{id}` - Get application detail
+- `DELETE /api/application/history/{id}` - Delete application
+- `DELETE /api/application/history` - Clear all application history
 
 ## Environment Variables
 
@@ -253,6 +253,22 @@ For production deployment:
 6. Set up proper database backups
 7. Use a CDN for the frontend
 8. Implement rate limiting and request validation
+
+## RAG Pipeline
+
+The system uses a Retrieval-Augmented Generation (RAG) pipeline with the following components:
+
+1. **Document Loading**: PDF is loaded using `PyPDFLoader`
+2. **Text Splitting**: Documents are chunked using `RecursiveCharacterTextSplitter` (chunk_size=1000, chunk_overlap=200)
+3. **Embeddings**: Uses HuggingFace API for `sentence-transformers/all-mpnet-base-v2` (no local model downloads)
+4. **Vector Store**: ChromaDB (Jupyter) or PGVector (backend) stores the embeddings
+5. **LLM**: Uses DeepSeek-V3.2 via HuggingFace API for text generation (not Mistral-7B locally)
+6. **Prompt Template**: Backend uses a system prompt to ensure answers are only from CV context, with plain text output (no markdown)
+
+### Backend LLM Details
+- **Text Generation**: DeepSeek-V3.2 (API: `https://router.huggingface.co/v1/chat/completions`)
+- **Embeddings**: sentence-transformers/all-mpnet-base-v2 (API: `https://router.huggingface.co/hf-inference/models/sentence-transformers/all-mpnet-base-v2/pipeline/feature-extraction`)
+- **No local LLM or embedding model downloads required**
 
 ## License
 
