@@ -19,7 +19,7 @@ langchain-text-splitters==0.0.2
 pgvector==0.2.4
 
 sentence-transformers==2.2.2
-huggingface-hub==0.21.4
+huggingface-hub>=0.23.0
 
 pydantic==2.6.1
 pydantic-settings==2.1.0
