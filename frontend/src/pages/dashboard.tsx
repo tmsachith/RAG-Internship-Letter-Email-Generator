@@ -123,14 +123,22 @@ export default function Dashboard() {
               {cvStatus.cv.processed ? (
                 <div className="space-y-4">
                   <p className="text-gray-600 mb-4">
-                    Your CV has been processed. You can now ask questions about it.
+                    Your CV has been processed. You can now use our services.
                   </p>
-                  <Link
-                    href="/chat"
-                    className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                  >
-                    Start Chatting
-                  </Link>
+                  <div className="flex gap-4">
+                    <Link
+                      href="/chat"
+                      className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    >
+                      Ask Questions
+                    </Link>
+                    <Link
+                      href="/application"
+                      className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                    >
+                      Generate Application
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">

@@ -46,3 +46,9 @@ export const chatAPI = {
   ask: (question: string) =>
     api.post('/api/chat/ask', { question }),
 };
+
+// Application API
+export const applicationAPI = {
+  generate: (job_description: string, application_type: 'cover_letter' | 'email') =>
+    api.post('/api/application/generate', { job_description, application_type }),
+};

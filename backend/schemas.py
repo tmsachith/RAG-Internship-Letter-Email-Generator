@@ -43,3 +43,15 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     question: str
     answer: str
+
+# Application generation schemas
+class ApplicationRequest(BaseModel):
+    job_description: str
+    application_type: str  # 'cover_letter' or 'email'
+
+class CoverLetterResponse(BaseModel):
+    content: str
+
+class EmailResponse(BaseModel):
+    subject: str
+    content: str

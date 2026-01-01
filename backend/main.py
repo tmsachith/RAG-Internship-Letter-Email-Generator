@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, cv, chat
+from routes import auth, cv, chat, application
 from database import engine, Base
 
 # Create database tables (disabled for production, use Alembic or manual migration)
@@ -21,6 +21,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(cv.router, prefix="/api/cv", tags=["CV Management"])
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
+app.include_router(application.router, prefix="/api/application", tags=["Application Generation"])
 
 @app.get("/")
 def read_root():

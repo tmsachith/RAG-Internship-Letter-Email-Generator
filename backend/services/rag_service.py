@@ -98,5 +98,170 @@ class RAGService:
             print(f"Query Error: {str(e)}")
             raise Exception(f"Failed to query CV with DeepSeek: {str(e)}")
 
+    def generate_application(self, user_id: int, job_description: str, application_type: str) -> dict:
+        """
+        Generate a personalized cover letter or email based on CV and job description
+        
+        Args:
+            user_id: The user's ID
+            job_description: The job description text
+            application_type: Either 'cover_letter' or 'email'
+            
+        Returns:
+            dict: For cover_letter returns {'content': str}, for email returns {'subject': str, 'content': str}
+        """
+        try:
+            # Retrieve relevant CV sections
+            vectorstore = PGVector(
+                connection_string=settings.DATABASE_URL,
+                embedding_function=self.embedding_model,
+                collection_name=f"user_{user_id}_cv"
+            )
+            retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
+            
+            def format_docs(docs):
+                return "\n\n".join([d.page_content for d in docs])
+            
+            # Get relevant CV context based on job description
+            cv_context = format_docs(retriever.get_relevant_documents(job_description))
+            
+            # Create appropriate prompt based on application type
+            if application_type == "cover_letter":
+                return self._generate_cover_letter(cv_context, job_description)
+            elif application_type == "email":
+                return self._generate_email(cv_context, job_description)
+            else:
+                raise ValueError(f"Invalid application_type: {application_type}")
+                
+        except Exception as e:
+            print(f"Application Generation Error: {str(e)}")
+            raise Exception(f"Failed to generate application: {str(e)}")
+
+    def _generate_cover_letter(self, cv_context: str, job_description: str) -> dict:
+        """Generate a personalized cover letter"""
+        API_URL = "https://router.huggingface.co/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        
+        prompt = f"""You are an expert career advisor and professional writer. Create a compelling, personalized cover letter based on the candidate's CV and the job description.
+
+CV Information:
+{cv_context}
+
+Job Description:
+{job_description}
+
+Requirements:
+1. Write a professional, engaging cover letter (3-4 paragraphs)
+2. Highlight relevant skills, experiences, and achievements from the CV that match the job requirements
+3. Show enthusiasm and cultural fit
+4. Include specific examples and accomplishments
+5. Make it personal and authentic, not generic
+6. Use professional tone and proper business letter format
+7. Start with a strong opening that captures attention
+8. End with a clear call to action
+
+Generate ONLY the cover letter content (no additional commentary). Include proper salutation and closing."""
+
+        data = {
+            "model": "deepseek-ai/DeepSeek-V3.2",
+            "messages": [
+                {"role": "system", "content": "You are an expert career advisor specializing in writing compelling cover letters that get results."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 2048,
+            "temperature": 0.8
+        }
+        
+        response = requests.post(API_URL, headers=headers, json=data)
+        if response.status_code == 200:
+            result = response.json()
+            try:
+                content = result["choices"][0]["message"]["content"]
+                return {"content": content}
+            except Exception:
+                return {"content": str(result)}
+        else:
+            raise Exception(f"DeepSeek API error: {response.status_code} {response.text}")
+
+    def _generate_email(self, cv_context: str, job_description: str) -> dict:
+        """Generate a personalized email with subject line"""
+        API_URL = "https://router.huggingface.co/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        
+        prompt = f"""You are an expert career advisor and professional writer. Create a compelling, personalized job application email based on the candidate's CV and the job description.
+
+CV Information:
+{cv_context}
+
+Job Description:
+{job_description}
+
+Requirements:
+1. Create a catchy, professional email subject line
+2. Write a concise but impactful email body (2-3 short paragraphs)
+3. Highlight the most relevant skills and experiences that match the job
+4. Show enthusiasm and fit for the role
+5. Include 1-2 specific achievements or examples
+6. Keep it professional yet personable
+7. End with a clear call to action
+8. Keep the email concise - suitable for email format (shorter than a cover letter)
+
+Format your response EXACTLY as follows:
+SUBJECT: [your subject line here]
+
+BODY:
+[your email content here including greeting and closing]
+
+Generate ONLY the subject and body (no additional commentary)."""
+
+        data = {
+            "model": "deepseek-ai/DeepSeek-V3.2",
+            "messages": [
+                {"role": "system", "content": "You are an expert career advisor specializing in writing compelling job application emails."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 1536,
+            "temperature": 0.8
+        }
+        
+        response = requests.post(API_URL, headers=headers, json=data)
+        if response.status_code == 200:
+            result = response.json()
+            try:
+                full_content = result["choices"][0]["message"]["content"]
+                # Parse subject and body
+                lines = full_content.split('\n')
+                subject = ""
+                body_lines = []
+                in_body = False
+                
+                for line in lines:
+                    if line.startswith("SUBJECT:"):
+                        subject = line.replace("SUBJECT:", "").strip()
+                    elif line.startswith("BODY:"):
+                        in_body = True
+                    elif in_body:
+                        body_lines.append(line)
+                
+                body = '\n'.join(body_lines).strip()
+                
+                # Fallback if parsing fails
+                if not subject or not body:
+                    subject = "Application for Position"
+                    body = full_content
+                
+                return {"subject": subject, "content": body}
+            except Exception as e:
+                print(f"Parsing error: {e}")
+                return {"subject": "Application for Position", "content": str(result)}
+        else:
+            raise Exception(f"DeepSeek API error: {response.status_code} {response.text}")
+
 # Singleton instance
 rag_service = RAGService()
