@@ -12,7 +12,7 @@ class HuggingFaceAPIEmbeddings(Embeddings):
     """Custom embeddings using HuggingFace API - lightweight, no model downloads"""
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.api_url = "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction"
+        self.api_url = "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-mpnet-base-v2/pipeline/feature-extraction"
     
     def embed_documents(self, texts: list) -> list:
         """Embed multiple texts"""
