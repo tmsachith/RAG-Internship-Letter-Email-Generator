@@ -1,4 +1,5 @@
 import os
+import re
 import requests
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -14,8 +15,8 @@ class RAGService:
     def __init__(self):
         self.embedding_model = None
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=500,
-            chunk_overlap=50
+            chunk_size=1000,
+            chunk_overlap=200
         )
         self._initialize_models()
 
@@ -26,6 +27,21 @@ class RAGService:
             model_kwargs={'device': 'cpu'}
         )
 
+    def _markdown_to_html(self, text: str) -> str:
+        """Convert markdown formatting to HTML"""
+        # Bold: **text** or __text__ -> <strong>text</strong>
+        text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+        text = re.sub(r'__(.+?)__', r'<strong>\1</strong>', text)
+        
+        # Italic: *text* or _text_ -> <em>text</em>
+        text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', text)
+        text = re.sub(r'_(.+?)_', r'<em>\1</em>', text)
+        
+        # Preserve line breaks
+        text = text.replace('\n', '<br>')
+        
+        return text
+
     def _call_deepseek(self, context: str, question: str) -> str:
         API_URL = "https://router.huggingface.co/v1/chat/completions"
         headers = {
@@ -35,11 +51,11 @@ class RAGService:
         data = {
             "model": "deepseek-ai/DeepSeek-V3.2",
             "messages": [
-                {"role": "system", "content": "You are an expert HR assistant. Answer the user's question based strictly on the provided CV context."},
-                {"role": "user", "content": f"Context from CV:\n{context}\n\nQuestion: {question}"}
+                {"role": "system", "content": "You are an expert HR assistant. Answer questions ONLY using information from the provided CV context. If the information is not in the context, clearly state that. Be precise and accurate - do not make assumptions or provide information not explicitly mentioned in the CV. Provide answers in plain text without any markdown formatting (no **, __, or other markdown symbols)."},
+                {"role": "user", "content": f"CV Context:\n{context}\n\nQuestion: {question}\n\nAnswer based ONLY on the CV context above in plain text format. If the answer is not in the context, say 'I cannot find that information in your CV.'"}
             ],
             "max_tokens": 1024,
-            "temperature": 0.7
+            "temperature": 0.3
         }
         response = requests.post(API_URL, headers=headers, json=data)
         if response.status_code == 200:
@@ -87,7 +103,7 @@ class RAGService:
                 embedding_function=self.embedding_model,
                 collection_name=f"user_{user_id}_cv"
             )
-            retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+            retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
             def format_docs(docs):
                 return "\n\n".join([d.page_content for d in docs])
             # Retrieve context
@@ -117,7 +133,7 @@ class RAGService:
                 embedding_function=self.embedding_model,
                 collection_name=f"user_{user_id}_cv"
             )
-            retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
+            retriever = vectorstore.as_retriever(search_kwargs={"k": 10})
             
             def format_docs(docs):
                 return "\n\n".join([d.page_content for d in docs])
@@ -162,6 +178,7 @@ Requirements:
 6. Use professional tone and proper business letter format
 7. Start with a strong opening that captures attention
 8. End with a clear call to action
+9. Write in plain text without any markdown formatting (no **, __, or other markdown symbols)
 
 Generate ONLY the cover letter content (no additional commentary). Include proper salutation and closing."""
 
@@ -180,7 +197,9 @@ Generate ONLY the cover letter content (no additional commentary). Include prope
             result = response.json()
             try:
                 content = result["choices"][0]["message"]["content"]
-                return {"content": content}
+                # Convert markdown to HTML
+                content_html = self._markdown_to_html(content)
+                return {"content": content_html}
             except Exception:
                 return {"content": str(result)}
         else:
@@ -211,6 +230,7 @@ Requirements:
 6. Keep it professional yet personable
 7. End with a clear call to action
 8. Keep the email concise - suitable for email format (shorter than a cover letter)
+9. Write in plain text without any markdown formatting (no **, __, or other markdown symbols)
 
 Format your response EXACTLY as follows:
 SUBJECT: [your subject line here]
@@ -256,7 +276,10 @@ Generate ONLY the subject and body (no additional commentary)."""
                     subject = "Application for Position"
                     body = full_content
                 
-                return {"subject": subject, "content": body}
+                # Convert markdown to HTML in body
+                body_html = self._markdown_to_html(body)
+                
+                return {"subject": subject, "content": body_html}
             except Exception as e:
                 print(f"Parsing error: {e}")
                 return {"subject": "Application for Position", "content": str(result)}

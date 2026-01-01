@@ -105,6 +105,13 @@ def process_cv_background(cv_id: int, user_id: int, pdf_url: str):
         if cv:
             cv.processed = True
             db.commit()
+            
+            # Delete PDF from Cloudinary after successful processing
+            try:
+                delete_pdf_from_cloudinary(cv.cloudinary_public_id)
+                print(f"Deleted PDF from Cloudinary for user {user_id}")
+            except Exception as e:
+                print(f"Warning: Could not delete PDF from Cloudinary: {str(e)}")
         db.close()
     except Exception as e:
         print(f"Error processing CV: {str(e)}")

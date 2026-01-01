@@ -8,6 +8,7 @@ export default function Upload() {
   const { user, loading: authLoading } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -69,20 +70,40 @@ export default function Upload() {
     try {
       await cvAPI.upload(file);
       setSuccess(true);
+      setProcessing(true);
+      
+      // Poll for CV processing completion
+      const checkProcessing = setInterval(async () => {
+        try {
+          const response = await cvAPI.getStatus();
+          if (response.data.has_cv && response.data.cv.processed) {
+            clearInterval(checkProcessing);
+            setProcessing(false);
+            router.push('/dashboard');
+          }
+        } catch (error) {
+          console.error('Error checking CV status:', error);
+        }
+      }, 2000); // Check every 2 seconds
+
+      // Timeout after 2 minutes
       setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
+        clearInterval(checkProcessing);
+        if (processing) {
+          router.push('/dashboard');
+        }
+      }, 120000);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Upload failed. Please try again.');
-    } finally {
       setUploading(false);
+      setProcessing(false);
     }
   };
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -110,9 +131,16 @@ export default function Upload() {
             </div>
           )}
 
-          {success && (
+          {success && !processing && (
             <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
               CV uploaded successfully! Redirecting...
+            </div>
+          )}
+
+          {processing && (
+            <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4 flex items-center">
+              <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-blue-700 mr-3"></div>
+              Processing your CV... This may take a moment.
             </div>
           )}
 
@@ -173,10 +201,17 @@ export default function Upload() {
           <div className="mt-6 flex space-x-4">
             <button
               onClick={handleUpload}
-              disabled={!file || uploading}
-              className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+              disabled={!file || uploading || processing}
+              className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {uploading ? 'Uploading...' : 'Upload CV'}
+              {uploading || processing ? (
+                <>
+                  <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  {uploading ? 'Uploading...' : 'Processing...'}
+                </>
+              ) : (
+                'Upload CV'
+              )}
             </button>
             <Link
               href="/dashboard"

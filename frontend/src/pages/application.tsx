@@ -64,11 +64,20 @@ export default function Application() {
   const handleCopy = () => {
     if (!result) return;
     
+    // Strip HTML tags for plain text copy
+    const stripHtml = (html: string) => {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || '';
+    };
+    
     let textToCopy = '';
+    const plainContent = stripHtml(result.content);
+    
     if (applicationType === 'email' && result.subject) {
-      textToCopy = `Subject: ${result.subject}\n\n${result.content}`;
+      textToCopy = `Subject: ${result.subject}\n\n${plainContent}`;
     } else {
-      textToCopy = result.content;
+      textToCopy = plainContent;
     }
     
     navigator.clipboard.writeText(textToCopy);
@@ -78,7 +87,7 @@ export default function Application() {
   if (authLoading || checkingCV) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-xl">Loading...</div>
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -216,11 +225,10 @@ export default function Application() {
                     {applicationType === 'email' && (
                       <h3 className="text-sm font-semibold text-gray-700 mb-2">Body:</h3>
                     )}
-                    <div className="prose prose-sm max-w-none">
-                      <pre className="whitespace-pre-wrap font-sans text-gray-900 leading-relaxed">
-                        {result.content}
-                      </pre>
-                    </div>
+                    <div 
+                      className="prose prose-sm max-w-none text-gray-900 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: result.content }}
+                    />
                   </div>
                 </div>
               )}
