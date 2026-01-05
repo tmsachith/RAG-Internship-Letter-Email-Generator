@@ -77,14 +77,57 @@ class RAGService:
             "Content-Type": "application/json",
         }
         data = {
-            "model": "deepseek-ai/DeepSeek-V3.2",
-            "messages": [
-                {"role": "system", "content": "You are an expert HR assistant. Answer questions ONLY using information from the provided CV context. If the information is not in the context, clearly state that. Be precise and accurate - do not make assumptions or provide information not explicitly mentioned in the CV. Provide answers in plain text without any markdown formatting (no **, __, or other markdown symbols)."},
-                {"role": "user", "content": f"CV Context:\n{context}\n\nQuestion: {question}\n\nAnswer based ONLY on the CV context above in plain text format. If the answer is not in the context, say 'I cannot find that information in your CV.'"}
-            ],
-            "max_tokens": 1024,
-            "temperature": 0.3
+    "model": "meta-llama/Llama-3.2-3B-Instruct",
+    "messages": [
+        {
+            "role": "system",
+            "content": (
+                "You are an expert HR and recruitment assistant specialized in writing professional "
+                "job application emails and cover letters.\n\n"
+
+                "CRITICAL CONSTRAINTS:\n"
+                "- Use ONLY the information explicitly present in the provided CV context.\n"
+                "- DO NOT invent, assume, or hallucinate any skills, experience, education, companies, "
+                "metrics, achievements, or personal details.\n"
+                "- If any required information is missing, respond with exactly:\n"
+                "  'I cannot find that information in your CV.'\n\n"
+
+                "ALLOWED BEHAVIOR:\n"
+                "- Rephrase CV information into clear, professional, and persuasive language.\n"
+                "- Express motivation, enthusiasm, and willingness to learn ONLY if it is consistent "
+                "with the CV content.\n"
+                "- Adapt wording to the role described (internship, full-stack, AI/ML, software engineer).\n"
+                "- Maintain a confident, polite, and intern-appropriate tone.\n\n"
+
+                "OUTPUT REQUIREMENTS:\n"
+                "- Produce a COMPLETE job application email or cover letter with:\n"
+                "  Greeting\n"
+                "  Introduction\n"
+                "  Relevant skills and experience mapped to the role\n"
+                "  Motivation and learning interest\n"
+                "  Professional closing\n"
+                "- Output PLAIN TEXT ONLY.\n"
+                "- DO NOT use markdown, bullet points, emojis, or formatting symbols.\n"
+                "- Use short, clear paragraphs suitable for sending directly to a recruiter."
+            )
+        },
+        {
+            "role": "user",
+            "content": (
+                f"CV Context:\n{context}\n\n"
+                f"Task:\n{question}\n\n"
+                "Write the application using ONLY the CV context above. "
+                "Do not add any information that is not explicitly mentioned in the CV. "
+                "If required information is missing, say "
+                "'I cannot find that information in your CV.'"
+            )
         }
+    ],
+    "max_tokens": 1024,
+    "temperature": 0.35,
+    "top_p": 0.9
+}
+
         response = requests.post(API_URL, headers=headers, json=data)
         if response.status_code == 200:
             result = response.json()
