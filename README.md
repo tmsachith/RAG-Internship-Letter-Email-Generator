@@ -20,7 +20,7 @@ A web-based RAG (Retrieval-Augmented Generation) system that allows users to upl
 - **PostgreSQL** - User database
 - **ChromaDB** - Vector database
 - **LangChain** - RAG framework
-- **HuggingFace** - LLM (DeepSeek-V3.2) and embeddings(sentence-transformers/all-mpnet-base-v2)
+- **HuggingFace** - LLM (meta-llama/Llama-3.2-3B-Instruct) and embeddings(sentence-transformers/all-mpnet-base-v2)
 - **Cloudinary** - PDF storage (Delete CV after process.)
 - **JWT** - Authentication
 
@@ -262,11 +262,11 @@ The system uses a Retrieval-Augmented Generation (RAG) pipeline with the followi
 2. **Text Splitting**: Documents are chunked using `RecursiveCharacterTextSplitter` (chunk_size=1000, chunk_overlap=200)
 3. **Embeddings**: Uses HuggingFace API for `sentence-transformers/all-mpnet-base-v2` (no local model downloads)
 4. **Vector Store**: ChromaDB (Jupyter) or PGVector (backend) stores the embeddings
-5. **LLM**: Uses DeepSeek-V3.2 via HuggingFace API for text generation (not Mistral-7B locally)
+5. **LLM**: Uses meta-llama/Llama-3.2-3B-Instruct via HuggingFace API for text generation (not Mistral-7B locally)
 6. **Prompt Template**: Backend uses a system prompt to ensure answers are only from CV context, with plain text output (no markdown)
 
 ### Backend LLM Details
-- **Text Generation**: DeepSeek-V3.2 (API: `https://router.huggingface.co/v1/chat/completions`)
+- **Text Generation**: meta-llama/Llama-3.2-3B-Instruct (API: `https://router.huggingface.co/v1/chat/completions`)
 - **Embeddings**: sentence-transformers/all-mpnet-base-v2 (API: `https://router.huggingface.co/hf-inference/models/sentence-transformers/all-mpnet-base-v2/pipeline/feature-extraction`)
 - **No local LLM or embedding model downloads required**
 
