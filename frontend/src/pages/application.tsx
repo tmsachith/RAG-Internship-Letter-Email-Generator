@@ -233,15 +233,6 @@ export default function Application() {
                     >
                       Generate {applicationType === 'cover_letter' ? 'Cover Letter' : 'Email'}
                     </Button>
-
-                    {loading && (
-                      <div style={{ textAlign: 'center' }}>
-                        <Spin />
-                        <Paragraph type="secondary" style={{ marginTop: '8px' }}>
-                          Creating your personalized application...
-                        </Paragraph>
-                      </div>
-                    )}
                   </Space>
                 </form>
               </Card>
@@ -252,7 +243,7 @@ export default function Application() {
               <Card
                 title={`Generated ${applicationType === 'cover_letter' ? 'Cover Letter' : 'Email'}`}
                 extra={
-                  result && (
+                  result && !loading && (
                     <Button
                       type="primary"
                       icon={<CopyOutlined />}
@@ -264,7 +255,44 @@ export default function Application() {
                   )
                 }
               >
-                {!result ? (
+                {loading ? (
+                  <div style={{ padding: '20px' }}>
+                    <style jsx>{`
+                      @keyframes shimmer {
+                        0% {
+                          background-position: -1000px 0;
+                        }
+                        100% {
+                          background-position: 1000px 0;
+                        }
+                      }
+                      .shimmer {
+                        animation: shimmer 2s infinite linear;
+                        background: linear-gradient(to right, #f0f0f0 4%, #e0e0e0 25%, #f0f0f0 36%);
+                        background-size: 1000px 100%;
+                      }
+                    `}</style>
+                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                      <div className="shimmer" style={{ height: '24px', borderRadius: '4px', width: '60%' }} />
+                      <div className="shimmer" style={{ height: '1px', borderRadius: '4px', width: '100%', margin: '16px 0' }} />
+                      <div className="shimmer" style={{ height: '16px', borderRadius: '4px', width: '100%' }} />
+                      <div className="shimmer" style={{ height: '16px', borderRadius: '4px', width: '95%' }} />
+                      <div className="shimmer" style={{ height: '16px', borderRadius: '4px', width: '90%' }} />
+                      <div className="shimmer" style={{ height: '16px', borderRadius: '4px', width: '100%', marginTop: '16px' }} />
+                      <div className="shimmer" style={{ height: '16px', borderRadius: '4px', width: '85%' }} />
+                      <div className="shimmer" style={{ height: '16px', borderRadius: '4px', width: '92%' }} />
+                      <div className="shimmer" style={{ height: '16px', borderRadius: '4px', width: '88%' }} />
+                      <div className="shimmer" style={{ height: '16px', borderRadius: '4px', width: '100%', marginTop: '16px' }} />
+                      <div className="shimmer" style={{ height: '16px', borderRadius: '4px', width: '75%' }} />
+                    </Space>
+                    <div style={{ textAlign: 'center', marginTop: '32px' }}>
+                      <Spin size="large" />
+                      <Paragraph type="secondary" style={{ marginTop: '16px', fontSize: '14px' }}>
+                        Creating your personalized {applicationType === 'cover_letter' ? 'cover letter' : 'email'}...
+                      </Paragraph>
+                    </div>
+                  </div>
+                ) : !result ? (
                   <div style={{ textAlign: 'center', padding: '60px 20px' }}>
                     <FileTextOutlined style={{ fontSize: '64px', color: '#bfbfbf', marginBottom: '16px' }} />
                     <Title level={4}>No Application Generated Yet</Title>

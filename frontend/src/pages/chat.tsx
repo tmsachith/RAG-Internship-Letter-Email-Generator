@@ -36,7 +36,7 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
   const [cvProcessed, setCvProcessed] = useState(false);
   const [checkingCV, setCheckingCV] = useState(true);
-  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -48,15 +48,11 @@ export default function Chat() {
 
   useEffect(() => {
     if (user) {
+      // Load both CV status and chat history in parallel
       checkCVStatus();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (cvProcessed && !historyLoaded) {
       loadChatHistory();
     }
-  }, [cvProcessed, historyLoaded]);
+  }, [user]);
 
   useEffect(() => {
     scrollToBottom();
@@ -78,10 +74,10 @@ export default function Chat() {
         },
       ]);
       setMessages(historyMessages);
-      setHistoryLoaded(true);
     } catch (error) {
       console.error('Error loading chat history:', error);
-      setHistoryLoaded(true);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -178,135 +174,147 @@ export default function Chat() {
   }
 
   return (
-    <div style={{ height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }}>
-      <Title level={2}>
-        <MessageOutlined /> Chat with Your CV
-      </Title>
-      <Text type="secondary" style={{ marginBottom: '16px', display: 'block' }}>
-        Ask questions about your experience, skills, and education
-      </Text>
+    <div style={{ 
+      position: 'fixed',
+      top: '64px',
+      left: '0',
+      right: '0',
+      bottom: '70px',
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'white',
+      padding: '20px 50px 0 50px',
+    }}>
+      <div style={{ marginBottom: '20px' }}>
+        <Title level={2} style={{ margin: 0 }}>
+          <MessageOutlined /> Chat with Your CV
+        </Title>
+        <Text type="secondary">
+          Ask questions about your experience, skills, and education
+        </Text>
+      </div>
 
-      <Card
+      <div
         style={{
           flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
-        bodyStyle={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: 0,
-          overflow: 'hidden',
+          overflowY: 'auto',
+          padding: '24px',
+          background: '#fafafa',
+          borderRadius: '8px 8px 0 0',
+          border: '1px solid #f0f0f0',
+          borderBottom: 'none',
         }}
       >
-        <div
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '24px',
-            background: '#fafafa',
-          }}
-        >
-          {messages.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <RobotOutlined style={{ fontSize: '64px', color: '#bfbfbf', marginBottom: '16px' }} />
-              <Title level={4}>Start a conversation</Title>
-              <Paragraph type="secondary">
-                Ask me anything about your CV
-              </Paragraph>
-              <Divider />
-              <Space direction="vertical" align="start" style={{ textAlign: 'left' }}>
-                <Text type="secondary">Example questions:</Text>
-                <Text>• What is my work experience?</Text>
-                <Text>• What skills do I have?</Text>
-                <Text>• What is my education background?</Text>
-                <Text>• Summarize my professional experience</Text>
-              </Space>
-            </div>
-          ) : (
-            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-              {messages.map((message) => (
-                <div
-                  key={message.id}
+        {historyLoading ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <Spin size="large" />
+            <Paragraph type="secondary" style={{ marginTop: '16px' }}>
+              Loading chat history...
+            </Paragraph>
+          </div>
+        ) : messages.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <RobotOutlined style={{ fontSize: '64px', color: '#bfbfbf', marginBottom: '16px' }} />
+            <Title level={4}>Start a conversation</Title>
+            <Paragraph type="secondary">
+              Ask me anything about your CV
+            </Paragraph>
+            <Divider />
+            <Space direction="vertical" align="start" style={{ textAlign: 'left' }}>
+              <Text type="secondary">Example questions:</Text>
+              <Text>• What is my work experience?</Text>
+              <Text>• What skills do I have?</Text>
+              <Text>• What is my education background?</Text>
+              <Text>• Summarize my professional experience</Text>
+            </Space>
+          </div>
+        ) : (
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                style={{
+                  display: 'flex',
+                  justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
+                }}
+              >
+                <Space
+                  align="start"
                   style={{
-                    display: 'flex',
-                    justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
+                    maxWidth: '70%',
+                    flexDirection: message.type === 'user' ? 'row-reverse' : 'row',
                   }}
                 >
-                  <Space
-                    align="start"
+                  <Avatar
+                    icon={message.type === 'user' ? <UserOutlined /> : <RobotOutlined />}
                     style={{
-                      maxWidth: '70%',
-                      flexDirection: message.type === 'user' ? 'row-reverse' : 'row',
+                      backgroundColor: message.type === 'user' ? '#1890ff' : '#52c41a',
+                    }}
+                  />
+                  <Card
+                    size="small"
+                    style={{
+                      background: message.type === 'user' ? '#e6f7ff' : '#ffffff',
+                      border: message.type === 'user' ? '1px solid #91d5ff' : '1px solid #d9d9d9',
                     }}
                   >
-                    <Avatar
-                      icon={message.type === 'user' ? <UserOutlined /> : <RobotOutlined />}
-                      style={{
-                        backgroundColor: message.type === 'user' ? '#1890ff' : '#52c41a',
-                      }}
-                    />
-                    <Card
-                      size="small"
-                      style={{
-                        background: message.type === 'user' ? '#e6f7ff' : '#ffffff',
-                        border: message.type === 'user' ? '1px solid #91d5ff' : '1px solid #d9d9d9',
-                      }}
-                    >
-                      <Text style={{ whiteSpace: 'pre-wrap' }}>{message.content}</Text>
-                    </Card>
-                  </Space>
-                </div>
-              ))}
-              {loading && (
-                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                  <Space align="start">
-                    <Avatar icon={<RobotOutlined />} style={{ backgroundColor: '#52c41a' }} />
-                    <Card size="small">
-                      <Spin size="small" />
-                      <Text type="secondary" style={{ marginLeft: '8px' }}>
-                        Thinking...
-                      </Text>
-                    </Card>
-                  </Space>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </Space>
-          )}
-        </div>
+                    <Text style={{ whiteSpace: 'pre-wrap' }}>{message.content}</Text>
+                  </Card>
+                </Space>
+              </div>
+            ))}
+            {loading && (
+              <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <Space align="start">
+                  <Avatar icon={<RobotOutlined />} style={{ backgroundColor: '#52c41a' }} />
+                  <Card size="small">
+                    <Spin size="small" />
+                    <Text type="secondary" style={{ marginLeft: '8px' }}>
+                      Thinking...
+                    </Text>
+                  </Card>
+                </Space>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </Space>
+        )}
+      </div>
 
-        <div style={{ borderTop: '1px solid #f0f0f0', padding: '16px', background: 'white' }}>
-          <Space.Compact style={{ width: '100%' }}>
-            <TextArea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onPressEnter={(e) => {
-                if (!e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder="Ask a question about your CV..."
-              disabled={loading}
-              autoSize={{ minRows: 1, maxRows: 4 }}
-              style={{ resize: 'none' }}
-            />
-            <Button
-              type="primary"
-              icon={<SendOutlined />}
-              onClick={handleSend}
-              disabled={!input.trim() || loading}
-              loading={loading}
-              size="large"
-            >
-              Send
-            </Button>
-          </Space.Compact>
-        </div>
-      </Card>
+      <div style={{ 
+        padding: '16px 24px', 
+        background: 'white',
+        borderRadius: '0 0 8px 8px',
+        border: '1px solid #f0f0f0',
+        borderTop: '1px solid #f0f0f0',
+      }}>
+        <Space.Compact style={{ width: '100%' }}>
+          <TextArea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onPressEnter={(e) => {
+              if (!e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder="Ask a question about your CV..."
+            disabled={loading}
+            autoSize={{ minRows: 1, maxRows: 4 }}
+            style={{ resize: 'none' }}
+          />
+          <Button
+            type="primary"
+            icon={<SendOutlined />}
+            onClick={handleSend}
+            disabled={!input.trim() || loading}
+            loading={loading}
+            size="large"
+          >
+            Send
+          </Button>
+        </Space.Compact>
+      </div>
     </div>
   );
 }

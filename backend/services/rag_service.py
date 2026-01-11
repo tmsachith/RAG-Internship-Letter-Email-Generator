@@ -71,6 +71,7 @@ class RAGService:
         return text
 
     def _call_deepseek(self, context: str, question: str) -> str:
+        """Call DeepSeek API for answering questions about CV content (used in chat)"""
         API_URL = "https://router.huggingface.co/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}",
@@ -82,44 +83,37 @@ class RAGService:
         {
             "role": "system",
             "content": (
-                "You are an expert HR and recruitment assistant specialized in writing professional "
-                "job application emails and cover letters.\n\n"
+                "You are a helpful AI assistant that answers questions about a user's CV.\n\n"
 
                 "CRITICAL CONSTRAINTS:\n"
                 "- Use ONLY the information explicitly present in the provided CV context.\n"
                 "- DO NOT invent, assume, or hallucinate any skills, experience, education, companies, "
                 "metrics, achievements, or personal details.\n"
-                "- If any required information is missing, respond with exactly:\n"
+                "- If the requested information is not in the CV, respond with:\n"
                 "  'I cannot find that information in your CV.'\n\n"
 
-                "ALLOWED BEHAVIOR:\n"
-                "- Rephrase CV information into clear, professional, and persuasive language.\n"
-                "- Express motivation, enthusiasm, and willingness to learn ONLY if it is consistent "
-                "with the CV content.\n"
-                "- Adapt wording to the role described (internship, full-stack, AI/ML, software engineer).\n"
-                "- Maintain a confident, polite, and intern-appropriate tone.\n\n"
+                "RESPONSE STYLE:\n"
+                "- Provide direct, conversational answers to the user's questions.\n"
+                "- Be clear, concise, and informative.\n"
+                "- Use a friendly, helpful tone.\n"
+                "- Format responses naturally - use bullet points, paragraphs, or lists as appropriate.\n"
+                "- For questions about experience, summarize relevant work history.\n"
+                "- For questions about skills, list the skills mentioned in the CV.\n"
+                "- For questions about education, provide the educational background.\n\n"
 
-                "OUTPUT REQUIREMENTS:\n"
-                "- Produce a COMPLETE job application email or cover letter with:\n"
-                "  Greeting\n"
-                "  Introduction\n"
-                "  Relevant skills and experience mapped to the role\n"
-                "  Motivation and learning interest\n"
-                "  Professional closing\n"
-                "- Output PLAIN TEXT ONLY.\n"
-                "- DO NOT use markdown, bullet points, emojis, or formatting symbols.\n"
-                "- Use short, clear paragraphs suitable for sending directly to a recruiter."
+                "IMPORTANT:\n"
+                "- You are NOT writing job applications or cover letters.\n"
+                "- You are answering questions conversationally about CV content.\n"
+                "- Keep responses informative but concise."
             )
         },
         {
             "role": "user",
             "content": (
                 f"CV Context:\n{context}\n\n"
-                f"Task:\n{question}\n\n"
-                "Write the application using ONLY the CV context above. "
-                "Do not add any information that is not explicitly mentioned in the CV. "
-                "If required information is missing, say "
-                "'I cannot find that information in your CV.'"
+                f"Question:\n{question}\n\n"
+                "Please answer the question based ONLY on the CV context provided. "
+                "If the information is not available in the CV, let me know."
             )
         }
     ],
@@ -293,7 +287,7 @@ Job Description:
 {job_description}
 
 Requirements:
-1. Create a catchy, professional email subject line
+1. Create a SHORT, professional email subject line (maximum 6-8 words). Format: "[Job Title] Application" or "Application for [Job Title]". Keep it simple and direct.
 2. Write a concise but impactful email body (2-3 short paragraphs)
 3. Highlight the most relevant skills and experiences that match the job
 4. Show enthusiasm and fit for the role

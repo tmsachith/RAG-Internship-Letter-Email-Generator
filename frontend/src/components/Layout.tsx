@@ -101,6 +101,11 @@ export default function Layout({ children }: LayoutProps) {
     <AntLayout style={{ minHeight: '100vh' }}>
       <Header
         style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -138,7 +143,7 @@ export default function Layout({ children }: LayoutProps) {
           </Dropdown>
         )}
       </Header>
-      <Content style={{ padding: '50px', background: 'white' }}>
+      <Content style={{ marginTop: '64px', padding: '50px', background: 'white', minHeight: 'calc(100vh - 64px - 70px)' }}>
         {children}
       </Content>
       <Footer style={{ textAlign: 'center', background: '#001529', color: 'white' }}>
