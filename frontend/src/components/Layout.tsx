@@ -138,19 +138,8 @@ export default function Layout({ children }: LayoutProps) {
           </Dropdown>
         )}
       </Header>
-      <Content style={{ padding: '50px', background: '#f0f2f5' }}>
-        <div
-          style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            background: 'white',
-            padding: '24px',
-            borderRadius: '8px',
-            minHeight: '500px',
-          }}
-        >
-          {children}
-        </div>
+      <Content style={{ padding: '50px', background: 'white' }}>
+        {children}
       </Content>
       <Footer style={{ textAlign: 'center', background: '#001529', color: 'white' }}>
         RAG CV Assistant ©{new Date().getFullYear()} - TM Sachith
