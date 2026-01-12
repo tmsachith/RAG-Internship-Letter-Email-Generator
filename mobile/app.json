@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -21,15 +20,16 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1890ff"
       },
-      "package": "com.ragcv.mobile",
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "package": "com.ragcv.mobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "apiUrl": "http://localhost:8000"
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

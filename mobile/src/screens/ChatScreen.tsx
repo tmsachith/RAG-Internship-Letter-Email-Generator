@@ -209,7 +209,7 @@ export default function ChatScreen({ navigation }: any) {
           renderItem={renderMessage}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.messagesList}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
         />
       )}
 
@@ -220,7 +220,7 @@ export default function ChatScreen({ navigation }: any) {
           onChangeText={setInput}
           placeholder="Ask a question about your CV..."
           placeholderTextColor={COLORS.textSecondary}
-          multiline
+          multiline={true}
           maxLength={500}
           editable={!loading}
         />

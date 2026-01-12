@@ -144,7 +144,7 @@ export default function ApplicationScreen({ navigation }: any) {
           onChangeText={setJobDescription}
           placeholder="Paste the job description here..."
           placeholderTextColor={COLORS.textSecondary}
-          multiline
+          multiline={true}
           numberOfLines={8}
           textAlignVertical="top"
         />
@@ -172,7 +172,7 @@ export default function ApplicationScreen({ navigation }: any) {
               </View>
             )}
 
-            <ScrollView style={styles.contentScroll} nestedScrollEnabled>
+            <ScrollView style={styles.contentScroll} nestedScrollEnabled={true}>
               <Text style={styles.contentText}>{stripHtml(result.content)}</Text>
             </ScrollView>
           </View>

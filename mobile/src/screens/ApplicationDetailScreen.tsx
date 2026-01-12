@@ -95,7 +95,7 @@ export default function ApplicationDetailScreen({ route, navigation }: any) {
       )}
 
       <Card title="Content">
-        <ScrollView style={styles.contentScroll} nestedScrollEnabled>
+        <ScrollView style={styles.contentScroll} nestedScrollEnabled={true}>
           <Text style={styles.content}>{stripHtml(application.content)}</Text>
         </ScrollView>
       </Card>

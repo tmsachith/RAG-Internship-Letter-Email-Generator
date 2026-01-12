@@ -102,7 +102,7 @@ export default function SignupScreen({ navigation }: any) {
             value={password}
             onChangeText={setPassword}
             placeholder="Enter your password"
-            secureTextEntry
+            secureTextEntry={true}
             autoCapitalize="none"
             autoComplete="password"
             error={errors.password}
@@ -113,7 +113,7 @@ export default function SignupScreen({ navigation }: any) {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             placeholder="Confirm your password"
-            secureTextEntry
+            secureTextEntry={true}
             autoCapitalize="none"
             error={errors.confirmPassword}
           />

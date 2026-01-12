@@ -87,7 +87,7 @@ export default function LoginScreen({ navigation }: any) {
             value={password}
             onChangeText={setPassword}
             placeholder="Enter your password"
-            secureTextEntry
+            secureTextEntry={true}
             autoCapitalize="none"
             autoComplete="password"
             error={errors.password}
