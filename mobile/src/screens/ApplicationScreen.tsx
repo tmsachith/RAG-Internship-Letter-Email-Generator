@@ -10,6 +10,7 @@ import {
   Alert as RNAlert,
   Clipboard,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { applicationAPI } from '../api';
 import { Card, Button, Alert } from '../components';
 import { COLORS, SPACING } from '../utils/constants';
@@ -23,6 +24,7 @@ export default function ApplicationScreen({ navigation }: any) {
   const [result, setResult] = useState<ApplicationResult | null>(null);
   const [history, setHistory] = useState<ApplicationHistory[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   useEffect(() => {
     fetchHistory();
@@ -85,8 +87,9 @@ export default function ApplicationScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Card title="Generate Application">
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Card title="Generate Application">
         <Text style={styles.description}>
           Create a personalized cover letter or email based on your CV and the job description.
         </Text>
@@ -179,14 +182,16 @@ export default function ApplicationScreen({ navigation }: any) {
         )}
       </Card>
 
-      <Card title="Recent Applications">
+      <View style={styles.cardSpacing}>
+        <Text style={styles.sectionTitle}>Recent Applications</Text>
+        <View style={styles.recentCard}>
         {loadingHistory ? (
           <ActivityIndicator size="small" color={COLORS.primary} />
         ) : history.length === 0 ? (
           <Text style={styles.emptyText}>No applications yet</Text>
         ) : (
           <View>
-            {history.slice(0, 5).map((item) => (
+            {(showAllHistory ? history : history.slice(0, 5)).map((item) => (
               <TouchableOpacity
                 key={item.id}
                 style={styles.historyItem}
@@ -217,22 +222,34 @@ export default function ApplicationScreen({ navigation }: any) {
             {history.length > 5 && (
               <TouchableOpacity
                 style={styles.viewAllButton}
-                onPress={() => navigation.navigate('History', { screen: 'ApplicationHistory' })}
+                onPress={() => setShowAllHistory(!showAllHistory)}
               >
-                <Text style={styles.viewAllText}>View All Applications</Text>
+                <Text style={styles.viewAllText}>
+                  {showAllHistory ? 'Show Less' : `View All (${history.length})`}
+                </Text>
+                <Ionicons 
+                  name={showAllHistory ? 'chevron-up' : 'chevron-down'} 
+                  size={20} 
+                  color={COLORS.primary} 
+                />
               </TouchableOpacity>
             )}
           </View>
         )}
-      </Card>
-    </ScrollView>
+        </View>
+      </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: COLORS.backgroundSecondary,
+  },
+  container: {
+    flex: 1,
   },
   content: {
     padding: SPACING.md,
@@ -344,8 +361,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     borderRadius: 8,
     marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   historyIcon: {
     width: 40,
@@ -375,12 +390,30 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   viewAllButton: {
-    padding: SPACING.md,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    marginTop: SPACING.sm,
   },
   viewAllText: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.primary,
+    marginRight: SPACING.xs,
+  },
+  cardSpacing: {
+    marginTop: SPACING.lg,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: SPACING.md,
+  },
+  recentCard: {
+    backgroundColor: COLORS.background,
+    borderRadius: 12,
+    padding: SPACING.md,
   },
 });

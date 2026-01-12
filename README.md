@@ -31,6 +31,14 @@ A web-based RAG (Retrieval-Augmented Generation) system that allows users to upl
 - **Tailwind CSS** - Styling
 - **Axios** - API requests
 
+### Mobile App
+- **React Native** - Cross-platform mobile development
+- **Expo** - Development framework for React Native
+- **TypeScript** - Type safety
+- **React Navigation** - Navigation and routing
+- **Tailwind CSS** - Styling
+- **Axios** - API requests
+
 ## Project Structure
 
 ```
@@ -55,22 +63,28 @@ RAG/
 │   ├── requirements.txt
 │   └── .env.example
 │
-└── frontend/
-    ├── src/
-    │   ├── pages/
-    │   │   ├── index.tsx         # Home page
-    │   │   ├── login.tsx         # Login page
-    │   │   ├── signup.tsx        # Signup page
-    │   │   ├── dashboard.tsx     # Dashboard
-    │   │   ├── upload.tsx        # CV upload page
-    │   │   ├── chat.tsx          # Chat interface (with history)
-    │   │   └── application.tsx   # Application generator (with history)
-    │   ├── contexts/
-    │   │   └── AuthContext.tsx   # Authentication context
-    │   ├── lib/
-    │   │   └── api.ts            # API client
-    │   └── styles/
-    │       └── globals.css       # Global styles
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── index.tsx         # Home page
+│   │   │   ├── login.tsx         # Login page
+│   │   │   ├── signup.tsx        # Signup page
+│   │   │   ├── dashboard.tsx     # Dashboard
+│   │   │   ├── upload.tsx        # CV upload page
+│   │   │   ├── chat.tsx          # Chat interface (with history)
+│   │   │   └── application.tsx   # Application generator (with history)
+│   │   ├── contexts/
+│   │   │   └── AuthContext.tsx   # Authentication context
+│   │   ├── lib/
+│   │   │   └── api.ts            # API client
+│   │   └── styles/
+│   │       └── globals.css       # Global styles
+│   ├── package.json
+│   └── .env.example
+│
+└── mobile/
+    ├── App.tsx                   # Main application file
+    ├── app.json                  # Expo configuration
     ├── package.json
     └── .env.example
 ```
@@ -157,6 +171,27 @@ The backend will be available at `http://localhost:8000`
 
 The frontend will be available at `http://localhost:3000`
 
+### Mobile App Setup
+
+1. Navigate to the mobile directory:
+   ```bash
+   cd mobile
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm start
+   ```
+
+4. Use the Expo Go app to scan the QR code and run the app on your device.
+
+The mobile app provides a seamless experience for interacting with the RAG CV System on the go.
+
 ## Usage
 
 1. **Sign Up**: Create a new account with email and password
@@ -220,6 +255,11 @@ CHROMA_PERSIST_DIRECTORY=./chroma_db
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
+### Mobile App (.env)
+```
+REACT_NATIVE_EXPO_API_URL=http://localhost:8000
+```
+
 ## Important Notes
 
 - **Large Model**: The Mistral-7B model requires significant GPU memory (at least 16GB VRAM). Consider using a smaller model or API-based inference if you don't have sufficient hardware.
@@ -240,6 +280,12 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 1. **API Connection Error**: Ensure the backend is running on the specified port
 2. **Login/Signup Fails**: Check browser console for detailed error messages
 3. **CORS Errors**: The backend is configured to allow localhost:3000. Update if using a different port.
+
+### Mobile App Issues
+
+1. **Expo Go App**: Ensure you have the Expo Go app installed on your mobile device
+2. **QR Code Scanning**: Make sure your development server is running and scan the correct QR code
+3. **Network Issues**: Ensure your mobile device is on the same network as your development machine
 
 ## Production Deployment
 

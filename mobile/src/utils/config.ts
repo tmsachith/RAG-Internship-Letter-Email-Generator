@@ -29,19 +29,15 @@
  *    - Use full HTTPS URL of deployed backend
  */
 
-// CHOOSE ONE - Uncomment the line you need:
+// ============================================
+// ENVIRONMENT-BASED CONFIGURATION
+// ============================================
 
-// For Android Emulator (MOST COMMON FOR TESTING):
-export const API_BASE_URL = 'http://10.0.2.2:8000';
+const isProduction = process.env.NODE_ENV === 'production';
 
-// For iOS Simulator (Mac only):
-// export const API_BASE_URL = 'http://localhost:8000';
-
-// For Physical Device (replace with YOUR computer's IP):
-// export const API_BASE_URL = 'http://192.168.1.100:8000';
-
-// For Production (deployed backend):
-// export const API_BASE_URL = 'https://your-backend-url.com';
+export const API_BASE_URL = isProduction
+  ? 'https://rag-internship-letter-email-generator-production.up.railway.app'
+  : 'http://localhost:8000';
 
 // ============================================
 // TROUBLESHOOTING

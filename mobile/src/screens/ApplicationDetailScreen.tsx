@@ -8,6 +8,7 @@ import {
   Clipboard,
   Alert as RNAlert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, Button } from '../components';
 import { COLORS, SPACING } from '../utils/constants';
 import { ApplicationHistory } from '../types';
@@ -57,8 +58,9 @@ export default function ApplicationDetailScreen({ route, navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Card>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.headerCard}>
         <View style={styles.header}>
           <View style={styles.typeContainer}>
             <Ionicons
@@ -82,7 +84,7 @@ export default function ApplicationDetailScreen({ route, navigation }: any) {
             day: 'numeric',
           })}
         </Text>
-      </Card>
+      </View>
 
       <Card title="Job Description">
         <Text style={styles.jobDescription}>{application.job_description}</Text>
@@ -96,7 +98,7 @@ export default function ApplicationDetailScreen({ route, navigation }: any) {
 
       <Card title="Content">
         <ScrollView style={styles.contentScroll} nestedScrollEnabled={true}>
-          <Text style={styles.content}>{stripHtml(application.content)}</Text>
+          <Text style={styles.contentText}>{stripHtml(application.content)}</Text>
         </ScrollView>
       </Card>
 
@@ -104,15 +106,25 @@ export default function ApplicationDetailScreen({ route, navigation }: any) {
         <Button title="Delete" onPress={handleDelete} variant="danger" fullWidth />
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: COLORS.backgroundSecondary,
   },
+  container: {
+    flex: 1,
+  },
   content: {
+    padding: SPACING.md,
+    gap: SPACING.lg,
+  },
+  headerCard: {
+    backgroundColor: COLORS.background,
+    borderRadius: 12,
     padding: SPACING.md,
   },
   header: {
@@ -147,6 +159,11 @@ const styles = StyleSheet.create({
   },
   contentScroll: {
     maxHeight: 400,
+  },
+  contentText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: COLORS.text,
   },
   actions: {
     marginTop: SPACING.md,

@@ -1,7 +1,9 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { COLORS } from '../utils/constants';
@@ -14,40 +16,8 @@ import SignupScreen from '../screens/SignupScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ApplicationScreen from '../screens/ApplicationScreen';
-import UploadCVScreen from '../screens/UploadCVScreen';
-import HistoryScreen from '../screens/HistoryScreen';
 import ApplicationDetailScreen from '../screens/ApplicationDetailScreen';
-
-// Profile Screen
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-
-function ProfileScreen() {
-  const { user, logout } = useAuth();
-
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: logout,
-      },
-    ]);
-  };
-
-  return (
-    <View style={styles.profileContainer}>
-      <View style={styles.profileHeader}>
-        <Ionicons name="person-circle" size={80} color={COLORS.primary} />
-        <Text style={styles.email}>{user?.email}</Text>
-      </View>
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Ionicons name="log-out-outline" size={24} color={COLORS.danger} />
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -61,12 +31,6 @@ function MainTabs() {
 
           if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Chat') {
-            iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
-          } else if (route.name === 'Application') {
-            iconName = focused ? 'document-text' : 'document-text-outline';
-          } else if (route.name === 'History') {
-            iconName = focused ? 'time' : 'time-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -92,21 +56,6 @@ function MainTabs() {
         options={{ title: 'Dashboard' }}
       />
       <Tab.Screen
-        name="Chat"
-        component={ChatScreen}
-        options={{ title: 'Chat' }}
-      />
-      <Tab.Screen
-        name="Application"
-        component={ApplicationScreen}
-        options={{ title: 'Application' }}
-      />
-      <Tab.Screen
-        name="History"
-        component={HistoryScreen}
-        options={{ title: 'History' }}
-      />
-      <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{ title: 'Profile' }}
@@ -115,7 +64,7 @@ function MainTabs() {
   );
 }
 
-export default function AppNavigator() {
+function AppNavigator() {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -123,7 +72,8 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
@@ -154,19 +104,60 @@ export default function AppNavigator() {
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="UploadCV"
-              component={UploadCVScreen}
-              options={{ title: 'Upload CV' }}
+              name="Chat"
+              component={ChatScreen}
+              options={{
+                title: 'Chat',
+                headerBackTitle: 'Back',
+                headerStyle: {
+                  backgroundColor: COLORS.background,
+                },
+                headerTitleStyle: {
+                  fontWeight: '600',
+                },
+                contentStyle: {
+                  paddingTop: 0,
+                },
+              }}
+            />
+            <Stack.Screen
+              name="Application"
+              component={ApplicationScreen}
+              options={{
+                title: 'Application',
+                headerBackTitle: 'Back',
+                headerStyle: {
+                  backgroundColor: COLORS.background,
+                },
+                headerTitleStyle: {
+                  fontWeight: '600',
+                },
+                contentStyle: {
+                  paddingTop: 0,
+                },
+              }}
             />
             <Stack.Screen
               name="ApplicationDetail"
               component={ApplicationDetailScreen}
-              options={{ title: 'Application Detail' }}
+              options={{ 
+                title: 'Application Detail',
+                headerStyle: {
+                  backgroundColor: COLORS.background,
+                },
+                headerTitleStyle: {
+                  fontWeight: '600',
+                },
+                contentStyle: {
+                  paddingTop: 0,
+                },
+              }}
             />
           </>
         )}
       </Stack.Navigator>
-    </NavigationContainer>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
 
@@ -206,3 +197,5 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 });
+
+export default AppNavigator;

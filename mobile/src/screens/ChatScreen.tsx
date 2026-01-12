@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Alert as RNAlert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { chatAPI } from '../api';
 import { ChatMessage, ChatHistory } from '../types';
 import { COLORS, SPACING } from '../utils/constants';
@@ -144,7 +145,7 @@ export default function ChatScreen({ navigation }: any) {
               {isUser ? 'You' : 'Assistant'}
             </Text>
           </View>
-          <Text style={styles.messageText}>{item.content}</Text>
+          <Text style={[styles.messageText, isUser && styles.userMessageText]}>{item.content}</Text>
         </View>
       </View>
     );
@@ -159,20 +160,12 @@ export default function ChatScreen({ navigation }: any) {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={100}
-    >
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Chat About Your CV</Text>
-        {messages.length > 0 && (
-          <TouchableOpacity onPress={handleClearHistory}>
-            <Ionicons name="trash-outline" size={24} color={COLORS.danger} />
-          </TouchableOpacity>
-        )}
-      </View>
-
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 70}
+      >
       {messages.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="chatbubbles-outline" size={64} color={COLORS.textSecondary} />
@@ -225,47 +218,38 @@ export default function ChatScreen({ navigation }: any) {
           editable={!loading}
         />
         <TouchableOpacity
-          style={[
-            styles.sendButton,
-            (!input.trim() || loading) && styles.sendButtonDisabled,
-          ]}
+          style={styles.sendButton}
           onPress={handleSend}
           disabled={!input.trim() || loading}
         >
           {loading ? (
-            <ActivityIndicator size="small" color="#ffffff" />
+            <ActivityIndicator size="small" color={COLORS.primary} />
           ) : (
-            <Ionicons name="send" size={24} color="#ffffff" />
+            <Ionicons 
+              name="send" 
+              size={28} 
+              color={(!input.trim() || loading) ? COLORS.border : COLORS.primary} 
+            />
           )}
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: COLORS.backgroundSecondary,
+  },
+  container: {
+    flex: 1,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: SPACING.md,
-    backgroundColor: COLORS.background,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text,
   },
   emptyContainer: {
     flex: 1,
@@ -326,7 +310,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   userBubble: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#e6f7ff',
+    borderWidth: 1,
+    borderColor: '#91d5ff',
   },
   assistantBubble: {
     backgroundColor: COLORS.background,
@@ -349,6 +335,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: COLORS.text,
   },
+  userMessageText: {
+    color: '#1a1a1a',
+  },
   inputContainer: {
     flexDirection: 'row',
     padding: SPACING.md,
@@ -367,15 +356,9 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   sendButton: {
-    backgroundColor: COLORS.primary,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: SPACING.sm,
-  },
-  sendButtonDisabled: {
-    backgroundColor: COLORS.border,
+    paddingLeft: SPACING.sm,
+    paddingRight: SPACING.xs,
   },
 });
