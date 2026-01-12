@@ -1,43 +1,28 @@
 /**
  * RAG CV System Mobile App - Configuration
  * 
- * IMPORTANT: Update API_BASE_URL before running!
+ * IMPORTANT: API URLs are stored in .env file for security
+ * Set API_BASE_URL_DEV and API_BASE_URL_PROD in your .env file
  */
+
+import { API_BASE_URL_DEV, API_BASE_URL_PROD } from '@env';
 
 // ============================================
 // BACKEND API CONFIGURATION
 // ============================================
 
-/**
- * API Base URL - CHANGE THIS based on your setup:
- * 
- * 1. Android Emulator: 'http://10.0.2.2:8000'
- *    - 10.0.2.2 is a special IP that routes to your host machine's localhost
- * 
- * 2. iOS Simulator: 'http://localhost:8000'
- *    - iOS simulator can use localhost directly
- * 
- * 3. Physical Device: 'http://YOUR_COMPUTER_IP:8000'
- *    - Find your IP:
- *      - Windows: Run 'ipconfig' in cmd
- *      - Mac: Run 'ifconfig' in terminal
- *      - Linux: Run 'ip addr' in terminal
- *    - Example: 'http://192.168.1.100:8000'
- *    - Both devices must be on the SAME WiFi network!
- * 
- * 4. Deployed Backend: 'https://your-api.herokuapp.com'
- *    - Use full HTTPS URL of deployed backend
- */
+// __DEV__ is a global constant in React Native that's true in development and false in production builds
+const isDevelopment = typeof __DEV__ !== 'undefined' && __DEV__;
 
-// ============================================
-// ENVIRONMENT-BASED CONFIGURATION
-// ============================================
+// Read API URLs from environment variables (via .env file)
+const apiBaseUrlDev = API_BASE_URL_DEV || '';
+const apiBaseUrlProd = API_BASE_URL_PROD || '';
 
-const isProduction = process.env.NODE_ENV === 'production';
+if (!apiBaseUrlDev || !apiBaseUrlProd) {
+  console.warn('Warning: API URLs not configured. Please check your .env file.');
+}
 
-export const API_BASE_URL = isProduction
-  ? 'https://rag-internship-letter-email-generator-production.up.railway.app'
-  : 'http://localhost:8000';
+export const API_BASE_URL = isDevelopment ? apiBaseUrlDev : apiBaseUrlProd;
 
 // ============================================
 // TROUBLESHOOTING
