@@ -26,7 +26,10 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "apiUrl": "http://localhost:8000"
+      "apiUrl": "http://localhost:8000",
+      "eas": {
+        "projectId": "248addbb-abd7-4b8f-bf51-2132d2f703d6"
+      }
     },
     "plugins": [
       "expo-font"

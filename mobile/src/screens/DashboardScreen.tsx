@@ -243,8 +243,8 @@ const styles = StyleSheet.create({
   },
   banner: {
     backgroundColor: COLORS.primary,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     padding: SPACING.xl,
     marginBottom: SPACING.md,
     elevation: 4,
